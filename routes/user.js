@@ -1,16 +1,44 @@
 const express = require("express");
-
+const cors = require("cors");
 const router = express.Router();
 
 const uid2 = require("uid2");
 const SHA256 = require("crypto-js/sha256");
 const encBase64 = require("crypto-js/enc-base64");
+const cloudinary = require("cloudinary").v2;
+const fileUpload = require("express-fileupload");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
 
 // appel de mon Model
 const User = require("../models/User");
 
-router.post("/signup", async (req, res) => {
+// Cloudinary acces
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
+
+// encryptage du file
+const converToBase64 = (file) => {
+  return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
+};
+
+router.post("/signup", fileUpload(), async (req, res) => {
   try {
+    // upload file
+    const pictureToUpload = req.files.avatar_user;
+    // console.log(pictureToUpload);
+    // save on cloudinary
+    const result = await cloudinary.uploader.upload(
+      converToBase64(pictureToUpload)
+    );
+    console.log("result", result);
+
     const { username, email, password, checkPassword } = req.body;
     if (password !== checkPassword) {
       res.status(400).json({ error: "Vos 2 mots de passe ne sont pas identiques" });
@@ -33,9 +61,19 @@ router.post("/signup", async (req, res) => {
           hash: hash,
           salt: salt,
           token: token,
+          avatar_user: {
+            secure_url: result.secure_url
+          }
         });
         await newUser.save();
-        res.status(200).json({ message: "compte créé" });
+        res.status(200).json({
+          _id: newUser._id,
+          token: newUser.token,
+          salt: newUser.salt,
+          hash: newUser.hash,
+          username: newUser.username,
+          avatar_user: newUser.avatar_user,
+        });
       }
     } else {
       res.status(400).json({ error: "Missing parameters" });
