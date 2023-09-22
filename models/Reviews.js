@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Reviews = mongoose.model('Reviews', {
     title: { type: String },
-    reviews: { type: String },
+    text: { type: String },
     game_id: { type: String },
     date: { type: Object },
     username: { type: String },

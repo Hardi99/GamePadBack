@@ -13,7 +13,7 @@ const isAuthenticaded = require("../middlewares/isAuthenticaded");
 
 // POST A REVIEWS
 router.post("/games/reviews", isAuthenticaded, async (req, res) => {
-  const { title, reviews, _id, game_id, date } = req.body;
+  const { title, text, game_id, date } = req.body;
   // console.log("->", req.user);
   try {
     const existingReviews = await Reviews.findOne({
@@ -28,7 +28,7 @@ router.post("/games/reviews", isAuthenticaded, async (req, res) => {
     } else {
       const newReviews = new Reviews({
         title: title,
-        reviews: reviews,
+        text: text,
         game_id: req.body.game_id,
         date: date,
         author: req.user,

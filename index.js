@@ -15,9 +15,11 @@ mongoose.connect(process.env.MONGODB_URI)
 
 const gamesRoutes = require('./routes/games')
 const userRoutes = require('./routes/user')
+const reviewsRoutes = require('./routes/reviews')
 
 app.use(gamesRoutes);
 app.use(userRoutes);
+app.use(reviewsRoutes);
 
 app.get("/platforms", async (req, res) => {
   try {
